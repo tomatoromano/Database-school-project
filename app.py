@@ -5,19 +5,26 @@ app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
 def get_db_connection():
-    conn = sqlite3.connect('databse.db')
+    conn = sqlite3.connect('databse.db')  
     conn.row_factory = sqlite3.Row
     return conn
 
+# Show homepage at '/'
 @app.route('/')
-def index():
+def home():
+    return render_template('yup.html')
+
+# Show latest submission at '/submission'
+@app.route('/submission')
+def submission():
     conn = get_db_connection()
     user = conn.execute('SELECT * FROM users ORDER BY id DESC LIMIT 1').fetchone()
     conn.close()
 
-    print(user)  # Debug statement
+    print(user)
     return render_template('index.html', user=user)
 
+#  Form submission route
 @app.route('/create', methods=('GET', 'POST'))
 def create():
     if request.method == 'POST':
@@ -37,14 +44,11 @@ def create():
                          (firstname, lastname, email))
             conn.commit()
             conn.close()
-            return redirect(url_for('index'))
+            return redirect(url_for('submission'))  #  redirect to /submission
 
     return render_template('yup2.html')
 
-@app.route('/home')
-def home():
-    return render_template('yup.html')
-
+# Optional: still keep /about
 @app.route('/about')
 def about():
     return render_template('yup3.html')
